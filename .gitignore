@@ -1,0 +1,129 @@
+# ===================================
+# GITIGNORE PARA PROYECTO FULLSTACK
+# Backend: Laravel + Frontend: Vue.js
+# ===================================
+
+# ===== ARCHIVOS DE SISTEMA =====
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*.tmp
+*.temp
+*.log
+
+# ===== EDITORES E IDEs =====
+/.vscode/
+/.idea/
+/.fleet/
+/.nova/
+/.zed/
+*.sublime-project
+*.sublime-workspace
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ===== VARIABLES DE ENTORNO =====
+# Permitir .env como plantilla, pero excluir variantes con datos reales
+.env.local
+.env.*.local
+.env.production
+.env.staging
+.env.testing
+.phpactor.json
+
+# ===== BACKEND (Laravel) =====
+# Dependencias
+/backend/vendor/
+/backend/node_modules/
+
+# Cache y archivos temporales
+/backend/.phpunit.result.cache
+/backend/.phpunit.cache
+/backend/bootstrap/cache/*.php
+/backend/storage/app/*
+!/backend/storage/app/.gitignore
+!/backend/storage/app/public/
+/backend/storage/framework/cache/data/*
+/backend/storage/framework/sessions/*
+/backend/storage/framework/testing/*
+/backend/storage/framework/views/*
+/backend/storage/logs/*
+/backend/storage/*.key
+/backend/storage/pail
+
+# Build y archivos públicos
+/backend/public/build/
+/backend/public/hot
+/backend/public/storage
+/backend/public/mix-manifest.json
+
+# Configuración local
+/backend/auth.json
+/backend/Homestead.json
+/backend/Homestead.yaml
+/backend/npm-debug.log
+/backend/yarn-error.log
+
+# ===== FRONTEND =====
+# Dependencias
+/frontend/node_modules/
+
+# Build y distribución
+/frontend/dist/
+/frontend/dist-ssr/
+/frontend/build/
+
+# Logs
+/frontend/logs/
+/frontend/*.log
+/frontend/npm-debug.log*
+/frontend/yarn-debug.log*
+/frontend/yarn-error.log*
+/frontend/pnpm-debug.log*
+/frontend/lerna-debug.log*
+
+# Coverage y testing
+/frontend/coverage/
+/frontend/.nyc_output/
+/frontend/cypress/videos/
+/frontend/cypress/screenshots/
+
+# Archivos locales
+/frontend/*.local
+/frontend/.env.local
+/frontend/.env.*.local
+/frontend/*.tsbuildinfo
+
+# ===== OTROS ARCHIVOS COMUNES =====
+# Archivos de respaldo
+*.bak
+*.backup
+*.swp
+*~
+
+# Archivos comprimidos
+*.zip
+*.tar
+*.tar.gz
+*.rar
+*.7z
+
+# Certificados y claves
+*.pem
+*.key
+*.crt
+*.p12
+
+# Archivos de base de datos
+*.sqlite
+*.db
+
+# Documentación generada
+/docs/build/
