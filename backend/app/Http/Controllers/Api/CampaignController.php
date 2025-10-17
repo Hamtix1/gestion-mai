@@ -97,18 +97,26 @@ class CampaignController extends Controller
         $campaign->load([
             'creator:id,name,email',
             'sterilizations' => function ($query) {
-                $query->select('id', 'campaign_id', 'owner_full_name', 'pet_name', 'pet_type', 'total_price', 'total_paid', 'payment_status', 'status')
+                $query->select('id', 'campaign_id', 'owner_full_name', 'owner_id_number', 'pet_name', 'pet_breed', 'pet_type', 'total_price', 'total_paid', 'payment_status', 'status', 'registered_by')
+                      ->with('registeredBy:id,name')
                       ->latest();
             },
         ]);
 
         // Calcular estadísticas
+        $paymentStats = $campaign->getPaymentStats();
+        
         $stats = [
             'total_sterilizations' => $campaign->sterilizations->count(),
             'remaining_slots' => $campaign->getRemainingSlots(),
             'total_income' => $campaign->getTotalIncome(),
             'total_expense' => $campaign->getTotalExpense(),
             'balance' => $campaign->getBalance(),
+            'total_collected' => $paymentStats['total_collected'],
+            'total_expected' => $paymentStats['total_expected'],
+            'completed_payments' => $paymentStats['completed_payments'],
+            'partial_payments' => $paymentStats['partial_payments'],
+            'pending_payments' => $paymentStats['pending_payments'],
         ];
 
         return response()->json([

@@ -86,6 +86,11 @@ class PaymentController extends Controller
                 ], 422);
             }
 
+            // Generar número de referencia automáticamente si no se proporciona
+            if (empty($validated['reference_number'])) {
+                $validated['reference_number'] = $this->generateReferenceNumber();
+            }
+
             // Crear el pago
             $payment = Payment::create([
                 ...$validated,
@@ -243,5 +248,35 @@ class PaymentController extends Controller
             ],
             'payments' => $payments,
         ], 200);
+    }
+
+    /**
+     * Generar número de referencia consecutivo
+     * Formato: PAY-YYYYMMDD-XXXX
+     * Ejemplo: PAY-20251016-0001
+     * 
+     * @return string
+     */
+    private function generateReferenceNumber(): string
+    {
+        $date = now()->format('Ymd'); // 20251016
+        $prefix = "PAY-{$date}-";
+
+        // Obtener el último pago del día
+        $lastPayment = Payment::where('reference_number', 'LIKE', "{$prefix}%")
+            ->orderBy('reference_number', 'desc')
+            ->first();
+
+        if ($lastPayment) {
+            // Extraer el número consecutivo del último pago
+            $lastNumber = (int) substr($lastPayment->reference_number, -4);
+            $newNumber = $lastNumber + 1;
+        } else {
+            // Primer pago del día
+            $newNumber = 1;
+        }
+
+        // Formatear con ceros a la izquierda (4 dígitos)
+        return $prefix . str_pad($newNumber, 4, '0', STR_PAD_LEFT);
     }
 }

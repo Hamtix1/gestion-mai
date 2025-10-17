@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * 
  * Gestiona los pagos/abonos realizados para las esterilizaciones
  * Permite pagos parciales y múltiples abonos
+ * Crea automáticamente ingresos cuando la esterilización está completamente pagada
  */
 class Payment extends Model
 {
@@ -74,12 +75,73 @@ class Payment extends Model
         // Después de crear un pago, actualizar el estado de la esterilización
         static::created(function ($payment) {
             $payment->sterilization->updatePaymentStatus();
+            
+            // Si la esterilización está completamente pagada, crear ingreso
+            static::createIncomeIfFullyPaid($payment->sterilization);
+        });
+
+        // Después de actualizar un pago, actualizar el estado de la esterilización
+        static::updated(function ($payment) {
+            $payment->sterilization->updatePaymentStatus();
+            
+            // Si la esterilización está completamente pagada, crear ingreso
+            static::createIncomeIfFullyPaid($payment->sterilization);
         });
 
         // Después de eliminar un pago, actualizar el estado de la esterilización
         static::deleted(function ($payment) {
             $payment->sterilization->updatePaymentStatus();
+            
+            // Si existe un ingreso asociado y ya no está pagado, eliminarlo
+            static::deleteIncomeIfNotPaid($payment->sterilization);
         });
+    }
+
+    /**
+     * Crear ingreso automáticamente si la esterilización está completamente pagada
+     */
+    protected static function createIncomeIfFullyPaid(Sterilization $sterilization): void
+    {
+        // Solo crear ingreso si está completamente pagado
+        if ($sterilization->payment_status !== Sterilization::PAYMENT_STATUS_COMPLETED) {
+            return;
+        }
+
+        // Verificar si ya existe un ingreso para esta esterilización
+        $existingIncome = Income::where('reference_number', 'STER-' . $sterilization->id)->first();
+        
+        if ($existingIncome) {
+            // Actualizar el monto si ya existe
+            $existingIncome->update([
+                'amount' => $sterilization->total_paid,
+            ]);
+            return;
+        }
+
+        // Crear nuevo ingreso
+        Income::create([
+            'campaign_id' => $sterilization->campaign_id,
+            'concept' => 'Esterilización #' . $sterilization->id . ' - ' . $sterilization->pet_name,
+            'description' => 'Ingreso por esterilización de ' . $sterilization->pet_name . ' (Propietario: ' . $sterilization->owner_full_name . ')',
+            'amount' => $sterilization->total_paid,
+            'source' => 'sterilization',
+            'income_date' => $sterilization->scheduled_date ?? now()->toDateString(),
+            'reference_number' => 'STER-' . $sterilization->id,
+            'registered_by' => auth()->id() ?? 1, // Usuario autenticado o admin por defecto
+        ]);
+    }
+
+    /**
+     * Eliminar ingreso si la esterilización ya no está pagada
+     */
+    protected static function deleteIncomeIfNotPaid(Sterilization $sterilization): void
+    {
+        // Si ya no está completamente pagado, eliminar el ingreso asociado
+        if ($sterilization->payment_status === Sterilization::PAYMENT_STATUS_COMPLETED) {
+            return;
+        }
+
+        Income::where('reference_number', 'STER-' . $sterilization->id)->delete();
     }
 
     /**

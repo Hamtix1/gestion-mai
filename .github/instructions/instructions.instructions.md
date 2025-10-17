@@ -7,3 +7,4 @@ applyTo: '**'
 -haz uso de patrones de diseño modernos
 -refactoriza el código siempre que sea posible
 -haz uso de comentarios en el código
+-no generar resumen

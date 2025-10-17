@@ -15,6 +15,9 @@ class DatabaseSeeder extends Seeder
         $this->call([
             RoleSeeder::class,
             AdminUserSeeder::class,
+            CampaignSeeder::class,
+            SterilizationSeeder::class,
+            PaymentSeeder::class, // Crea pagos de prueba y sincroniza con ingresos
         ]);
 
         $this->command->info('¡Base de datos inicializada exitosamente!');

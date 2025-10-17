@@ -184,4 +184,29 @@ class Campaign extends Model
     {
         return $this->getTotalIncome() - $this->getTotalExpense();
     }
+
+    /**
+     * Calcular total recaudado de las esterilizaciones de la campaña
+     * Suma el total_paid de todas las esterilizaciones
+     */
+    public function getTotalCollected(): float
+    {
+        return $this->sterilizations()->sum('total_paid');
+    }
+
+    /**
+     * Calcular estadísticas de pagos de la campaña
+     */
+    public function getPaymentStats(): array
+    {
+        $sterilizations = $this->sterilizations;
+        
+        return [
+            'completed_payments' => $sterilizations->where('payment_status', Sterilization::PAYMENT_STATUS_COMPLETED)->count(),
+            'partial_payments' => $sterilizations->where('payment_status', Sterilization::PAYMENT_STATUS_PARTIAL)->count(),
+            'pending_payments' => $sterilizations->where('payment_status', Sterilization::PAYMENT_STATUS_PENDING)->count(),
+            'total_collected' => $sterilizations->sum('total_paid'),
+            'total_expected' => $sterilizations->sum('total_price'),
+        ];
+    }
 }
